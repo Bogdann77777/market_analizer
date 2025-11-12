@@ -134,6 +134,38 @@ def extract_mls_number_from_email(body: str) -> Optional[str]:
     return None
 
 
+def extract_url_from_email(body: str) -> Optional[str]:
+    """
+    Извлекает URL листинга из текста письма
+
+    Args:
+        body: Текст письма
+
+    Returns:
+        URL или None если не найден
+    """
+    # Паттерны для поиска URL
+    # Redfin, OneHome, Zillow, Realtor.com и другие популярные сайты
+    patterns = [
+        r'(https?://(?:www\.)?redfin\.com/[^\s<>"\']+)',
+        r'(https?://portal\.onehome\.com/[^\s<>"\']+)',
+        r'(https?://(?:www\.)?zillow\.com/[^\s<>"\']+)',
+        r'(https?://(?:www\.)?realtor\.com/[^\s<>"\']+)',
+        r'(https?://[^\s<>"\']+/property[^\s<>"\']*)',
+        r'(https?://[^\s<>"\']+/listing[^\s<>"\']*)'
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, body, re.IGNORECASE)
+        if match:
+            url = match.group(1).strip()
+            # Удалить trailing символы вроде ), >, " и т.д.
+            url = re.sub(r'[)>\]"\']+$', '', url)
+            return url
+
+    return None
+
+
 def parse_land_email(body: str) -> Dict:
     """
     Главная функция парсинга письма о земельном участке
@@ -147,7 +179,8 @@ def parse_land_email(body: str) -> Dict:
             'address': str or None,
             'price': float or None,
             'lot_size': float or None,
-            'mls_number': str or None
+            'mls_number': str or None,
+            'url': str or None
         }
     """
     # Извлечь все поля
@@ -155,13 +188,15 @@ def parse_land_email(body: str) -> Dict:
     price = extract_price_from_email(body)
     lot_size = extract_lot_size_from_email(body)
     mls_number = extract_mls_number_from_email(body)
+    url = extract_url_from_email(body)
 
     # Собрать результат
     result = {
         'address': address,
         'price': price,
         'lot_size': lot_size,
-        'mls_number': mls_number
+        'mls_number': mls_number,
+        'url': url
     }
 
     return result

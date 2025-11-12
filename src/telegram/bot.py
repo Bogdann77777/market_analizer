@@ -199,6 +199,18 @@ async def send_alert(application: Application, chat_id: int, land_opp: LandOppor
 
         if prop.lot_size:
             message += f"📐 Размер: {prop.lot_size:.2f} acres\n"
+            # Рассчитать цену за акр
+            if price:
+                price_per_acre = price / prop.lot_size
+                message += f"💵 Цена за акр: ${price_per_acre:,.0f}\n"
+
+        # Добавить MLS номер
+        if prop.mls_number:
+            message += f"🏠 MLS: {prop.mls_number}\n"
+
+        # Добавить URL листинга
+        if prop.url:
+            message += f"🔗 Ссылка: {prop.url}\n"
 
         message += f"\n🟢 Зона: {land_opp.zone_color.replace('_', ' ').title()}\n"
         message += f"📈 Рынок: {land_opp.market_status.title()}\n"

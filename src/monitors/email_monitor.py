@@ -325,20 +325,39 @@ class EmailMonitor:
 
             listing = {}
 
-            # Extract price - look for dollar amounts
+            # Extract price - look for dollar amounts and take the largest one (most likely the listing price)
             price_patterns = [
-                r'\$([0-9,]+)',
+                r'List Price:\s*\$([0-9,]+)',
                 r'Price:\s*\$([0-9,]+)',
-                r'List Price:\s*\$([0-9,]+)'
+                r'Asking:\s*\$([0-9,]+)',
+                r'\$([0-9,]+)'
             ]
 
             page_text = soup.get_text()
-            for pattern in price_patterns:
+            potential_prices = []
+
+            # Try specific patterns first
+            for pattern in price_patterns[:3]:
                 match = re.search(pattern, page_text)
                 if match:
                     price_str = match.group(1).replace(',', '')
                     listing['price'] = float(price_str)
+                    logger.info(f"Found price with pattern '{pattern}': ${listing['price']:,.0f}")
                     break
+
+            # If no specific pattern matched, find all $ amounts and take the largest
+            if 'price' not in listing:
+                all_prices = re.findall(r'\$([0-9,]+)', page_text)
+                for price_str in all_prices:
+                    price_val = float(price_str.replace(',', ''))
+                    # Filter out unreasonable values (< $1000 are likely sqft prices, > $10M are unrealistic)
+                    if 1000 <= price_val <= 10000000:
+                        potential_prices.append(price_val)
+
+                if potential_prices:
+                    # Take the largest price (most likely the listing price)
+                    listing['price'] = max(potential_prices)
+                    logger.info(f"Selected largest price from {len(potential_prices)} candidates: ${listing['price']:,.0f}")
 
             # Extract acres
             acres_patterns = [
@@ -570,6 +589,7 @@ class EmailMonitor:
                 list_price=listing.get('price'),
                 sqft=listing.get('sqft', 0),
                 lot_size=listing.get('acres'),
+                url=listing.get('source_url'),
                 status='active',
                 archived=False
             )

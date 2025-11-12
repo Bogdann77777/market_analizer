@@ -113,6 +113,14 @@ class TelegramNotifier:
         if listing.get('price_per_acre'):
             lines.append(f"💵 *Price/Acre:* ${listing['price_per_acre']:,.0f}")
 
+        # Add MLS number if available
+        if listing.get('mls'):
+            lines.append(f"🏠 *MLS:* {listing['mls']}")
+
+        # Add URL if available
+        if listing.get('source_url'):
+            lines.append(f"🔗 *Link:* {listing['source_url']}")
+
         # Add zone analysis if available
         if zone_analysis and 'score' in zone_analysis:
             lines.extend([
