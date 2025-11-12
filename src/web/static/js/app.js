@@ -92,18 +92,19 @@ function renderMarkers() {
     const urgencyFilter = document.getElementById('urgency-filter').value;
     const colorFilter = document.getElementById('color-filter').value;
 
-    // Filter properties by status if "Active Only" is checked
-    let filteredProperties = allProperties;
+    // Separate properties into houses and vacant land
+    // Houses are ALWAYS shown (needed for zone visualization)
+    const houses = allProperties.filter(p => p.sqft > 100);
+
+    // Vacant land - apply Active Only filter ONLY to land, not houses
+    let vacantLand = allProperties.filter(p => p.sqft <= 100);
+
     if (activeOnly) {
-        filteredProperties = allProperties.filter(p => {
+        vacantLand = vacantLand.filter(p => {
             const status = (p.status || '').toLowerCase();
             return status === 'active';
         });
     }
-
-    // Separate properties into houses and vacant land
-    const houses = filteredProperties.filter(p => p.sqft > 100);
-    let vacantLand = filteredProperties.filter(p => p.sqft <= 100);
 
     // Apply price filter to vacant land
     if (landPriceFilter !== 'all') {
