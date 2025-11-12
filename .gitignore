@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+server.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads
+uploads/
+*.csv
+
+# Output
+output/
+
+# Environment
+.env
+credentials.json
+
+# Temporary files
+*.tmp
+*.bak
+~*
+
+# Test scripts
+check_*.py
+show_*.py
+update_urls_from_csv.py
+
+# Tunnel executables (large files)
+ngrok.exe
+cloudflared.exe

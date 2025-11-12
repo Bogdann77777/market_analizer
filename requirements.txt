@@ -1,0 +1,34 @@
+# Database
+sqlalchemy>=2.0.0
+# psycopg2-binary  # Requires PostgreSQL - using SQLite for testing
+
+# Data Processing
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Geocoding
+geopy>=2.4.0
+requests>=2.31.0
+
+# Mapping
+folium>=0.15.0
+
+# Web Scraping
+beautifulsoup4>=4.12.0
+selenium>=4.15.0
+
+# Gmail API
+google-auth>=2.25.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+google-api-python-client>=2.111.0
+
+# Telegram Bot
+python-telegram-bot>=20.7
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Web Server
+flask>=3.0.0
+flask-cors>=4.0.0

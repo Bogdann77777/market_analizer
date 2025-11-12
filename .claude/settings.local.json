@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m venv:*)",
+      "Bash(venv/Scripts/pip install:*)",
+      "Bash(venv/Scripts/python.exe -m pip:*)",
+      "Bash(venv/Scripts/python:*)",
+      "Bash(cat:*)",
+      "Bash(awk:*)",
+      "Bash(call venvScriptsactivate.bat)",
+      "Bash(python srcwebapp.py:*)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(dir:*)",
+      "Bash(source:*)",
+      "Bash(python src/web/app.py:*)",
+      "Bash(timeout 3 sh -c \"curl -X POST -F ''file=@redfin_2025-11-05-08-42-49.csv'' http://localhost:5001/api/import\")",
+      "Bash(python:*)",
+      "Bash(timeout 3 sh -c \"curl -s -X POST -F ''file=@redfin_2025-11-05-08-42-49.csv'' http://localhost:5001/api/import | python -m json.tool\")",
+      "WebSearch",
+      "WebFetch(domain:www.freemaptools.com)",
+      "Bash(timeout 5 sh -c \"curl -s -X POST -F ''file=@redfin_2025-11-11-16-19-42.csv'' http://localhost:5001/api/import | python -m json.tool\")",
+      "Bash(venv\\Scripts\\python.exe:*)",
+      "Bash(timeout 5 sh:*)",
+      "Bash(timeout 10 sh:*)",
+      "Bash(timeout 20 sh:*)",
+      "Bash(START_MONITOR.bat)",
+      "Bash(UPDATE_FILTERS.bat)",
+      "Bash(timeout 2 sh:*)",
+      "Bash(where:*)",
+      "Bash(node --version:*)",
+      "Bash(git init:*)",
+      "Bash(unzip:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asheville Land Analyzer</title>
+
+    <!-- Leaflet CSS (Open Street Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🏞️ Asheville Land Analyzer</h1>
+            <div class="stats" id="stats">
+                Loading stats...
+            </div>
+        </header>
+
+        <!-- Control Panel -->
+        <div class="controls">
+            <div class="control-group">
+                <button onclick="showImportModal()" class="btn-import">📁 Import CSV</button>
+                <label title="Houses, Townhouses, Condos">
+                    <input type="checkbox" id="toggle-houses" checked>
+                    🏠 Houses
+                </label>
+                <label title="Vacant Land (Empty Lots)">
+                    <input type="checkbox" id="toggle-vacant-land" checked>
+                    🌳 Vacant Land
+                </label>
+                <label style="display:none;">
+                    <input type="checkbox" id="toggle-opportunities">
+                    Opportunities
+                </label>
+            </div>
+
+            <div class="control-group" style="display:none;">
+                <label>Filter by urgency:</label>
+                <select id="urgency-filter">
+                    <option value="all">All</option>
+                    <option value="urgent">Urgent Only</option>
+                    <option value="good">Good+</option>
+                </select>
+            </div>
+
+            <div class="control-group" style="display:none;">
+                <label>Zone Color:</label>
+                <select id="color-filter">
+                    <option value="all">All</option>
+                    <option value="green">Green</option>
+                    <option value="light_green">Light Green</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="red">Red</option>
+                </select>
+            </div>
+
+            <div class="control-group vacant-land-filters">
+                <label>🌳 Land Price Filter:</label>
+                <select id="land-price-filter" onchange="handleLandPriceFilter()">
+                    <option value="all">All Prices</option>
+                    <option value="50000">Under $50k</option>
+                    <option value="75000">Under $75k</option>
+                    <option value="100000">Under $100k</option>
+                    <option value="150000">Under $150k</option>
+                    <option value="200000">Under $200k</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <input type="number"
+                       id="custom-price-filter"
+                       placeholder="Enter max price"
+                       style="display: none; width: 120px; margin-left: 10px;"
+                       onkeyup="if(event.key === 'Enter') applyCustomPrice()">
+                <button id="apply-custom-btn"
+                        onclick="applyCustomPrice()"
+                        style="display: none; margin-left: 5px;"
+                        class="btn-apply">Apply</button>
+            </div>
+
+            <div class="control-group vacant-land-filters">
+                <label>🌍 Land Size Filter:</label>
+                <select id="land-size-filter" onchange="handleLandSizeFilter()">
+                    <option value="all">All Sizes</option>
+                    <option value="0.25">Over 0.25 acres</option>
+                    <option value="0.5">Over 0.5 acres</option>
+                    <option value="1">Over 1 acre</option>
+                    <option value="2">Over 2 acres</option>
+                    <option value="5">Over 5 acres</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <input type="number"
+                       id="custom-size-filter"
+                       placeholder="Min acres"
+                       step="0.1"
+                       style="display: none; width: 100px; margin-left: 10px;"
+                       onkeyup="if(event.key === 'Enter') applyCustomSize()">
+                <button id="apply-size-btn"
+                        onclick="applyCustomSize()"
+                        style="display: none; margin-left: 5px;"
+                        class="btn-apply">Apply</button>
+            </div>
+
+            <button onclick="refreshMap()" class="btn-refresh">🔄 Refresh</button>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>Legend</h3>
+            <h4>Property Types:</h4>
+            <div class="legend-item">
+                <span class="marker house-green">●</span> House - High Value Zone
+            </div>
+            <div class="legend-item">
+                <span class="marker house-yellow">●</span> House - Medium Value Zone
+            </div>
+            <div class="legend-item">
+                <span class="marker house-red">●</span> House - Low Value Zone
+            </div>
+            <div class="legend-item">
+                <span class="marker vacant-land">▲</span> Vacant Land (Empty Lot)
+            </div>
+            <h4>Price Zones:</h4>
+            <div class="legend-item">
+                <span class="marker green">●</span> Green Zone ($350+/sqft)
+            </div>
+            <div class="legend-item">
+                <span class="marker yellow">●</span> Yellow Zone ($220-350/sqft)
+            </div>
+            <div class="legend-item">
+                <span class="marker red">●</span> Red Zone (<$220/sqft)
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeImportModal()">&times;</span>
+            <h2>Import CSV Data</h2>
+
+            <div class="import-instructions">
+                <p>📊 Upload a Redfin CSV file to import property data</p>
+                <p>Supported format: Redfin export CSV</p>
+            </div>
+
+            <div class="import-form">
+                <input type="file" id="csvFile" accept=".csv" />
+                <button onclick="importCSV()" class="btn-primary">Upload & Import</button>
+            </div>
+
+            <div id="importStatus" style="display: none;">
+                <div class="status-message"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="importResults" style="display: none;">
+                <h3>Import Complete!</h3>
+                <div class="results-stats"></div>
+                <button onclick="closeImportModal(); refreshMap();" class="btn-success">View on Map</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

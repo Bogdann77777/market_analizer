@@ -1,0 +1,41 @@
+{
+    "email": {
+        "server": "imap.gmail.com",
+        "port": 993,
+        "username": "bogliseckiy@gmail.com",
+        "password": "tbbduoeznccslrst",
+        "folder": "INBOX",
+        "sender": "CML@canopylistings.com",
+        "search_criteria": "FROM CML@canopylistings.com"
+    },
+    "filters": {
+        "max_price": 75000,
+        "min_lot_size_acres": 0.25,
+        "max_price_per_acre": 50000,
+        "search_radius_miles": 1.0,
+        "min_green_zone_ratio": 0.4,
+        "price_alerts": {
+            "under_50k": true,
+            "under_75k": true,
+            "under_100k": true
+        }
+    },
+    "telegram": {
+        "bot_token": "8522601631:AAHTowScesNCgfQg4VPmXiFzr7XqKpAwXp0",
+        "chat_id": "1873549647",
+        "enabled": true
+    },
+    "monitoring": {
+        "check_interval_minutes": 30,
+        "enabled": true,
+        "business_hours_only": false,
+        "start_hour": 8,
+        "end_hour": 22
+    },
+    "geocoding": {
+        "provider": "nominatim",
+        "api_key": "",
+        "fallback_city": "Asheville",
+        "fallback_state": "NC"
+    }
+}
