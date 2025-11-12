@@ -46,8 +46,13 @@ def get_stats():
             Property.url != ''
         ).count()
 
+        active_properties = session.query(Property).filter(
+            Property.status.in_(['active', 'Active', 'ACTIVE'])
+        ).count()
+
         stats = {
             'properties': session.query(Property).count(),
+            'active_properties': active_properties,
             'properties_with_url': properties_with_url,
             'streets': session.query(StreetAnalysis).count(),
             'opportunities': session.query(LandOpportunity).count(),
@@ -66,11 +71,12 @@ def get_properties():
         city = request.args.get('city', None)
         limit = request.args.get('limit', 15000, type=int)  # Increased to include all properties
 
-        # Build query
+        # Build query - only show ACTIVE properties (exclude sold, under contract, etc.)
         query = session.query(Property).filter(
             Property.latitude != None,
             Property.longitude != None,
-            Property.archived == False
+            Property.archived == False,
+            Property.status.in_(['active', 'Active', 'ACTIVE'])  # Only active listings
         )
 
         # Filter by city if specified

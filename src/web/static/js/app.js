@@ -44,6 +44,7 @@ async function loadStats() {
         const statsHTML = `
             <div class="stat-item">🏠 Houses: ${housesCount.toLocaleString()}</div>
             <div class="stat-item" id="vacant-land-stat">🌳 Vacant Land: ${vacantCount.toLocaleString()}</div>
+            <div class="stat-item">✅ Active: ${stats.active_properties.toLocaleString()}</div>
             <div class="stat-item">📦 Total: ${stats.properties.toLocaleString()}</div>
             <div class="stat-item">🔗 With URLs: ${stats.properties_with_url.toLocaleString()}</div>
             <div class="stat-item">🛣️ Streets: ${stats.streets}</div>
