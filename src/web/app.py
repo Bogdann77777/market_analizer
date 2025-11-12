@@ -71,12 +71,11 @@ def get_properties():
         city = request.args.get('city', None)
         limit = request.args.get('limit', 15000, type=int)  # Increased to include all properties
 
-        # Build query - only show ACTIVE properties (exclude sold, under contract, etc.)
+        # Build query - get all properties (filtering will be done on frontend)
         query = session.query(Property).filter(
             Property.latitude != None,
             Property.longitude != None,
-            Property.archived == False,
-            Property.status.in_(['active', 'Active', 'ACTIVE'])  # Only active listings
+            Property.archived == False
         )
 
         # Filter by city if specified

@@ -88,12 +88,22 @@ function renderMarkers() {
     const showHouses = document.getElementById('toggle-houses').checked;
     const showVacantLand = document.getElementById('toggle-vacant-land').checked;
     const showOpportunities = document.getElementById('toggle-opportunities').checked;
+    const activeOnly = document.getElementById('toggle-active-only').checked;
     const urgencyFilter = document.getElementById('urgency-filter').value;
     const colorFilter = document.getElementById('color-filter').value;
 
+    // Filter properties by status if "Active Only" is checked
+    let filteredProperties = allProperties;
+    if (activeOnly) {
+        filteredProperties = allProperties.filter(p => {
+            const status = (p.status || '').toLowerCase();
+            return status === 'active';
+        });
+    }
+
     // Separate properties into houses and vacant land
-    const houses = allProperties.filter(p => p.sqft > 100);
-    let vacantLand = allProperties.filter(p => p.sqft <= 100);
+    const houses = filteredProperties.filter(p => p.sqft > 100);
+    let vacantLand = filteredProperties.filter(p => p.sqft <= 100);
 
     // Apply price filter to vacant land
     if (landPriceFilter !== 'all') {
@@ -287,6 +297,7 @@ async function refreshMap() {
 // Event listeners
 document.getElementById('toggle-houses').addEventListener('change', renderMarkers);
 document.getElementById('toggle-vacant-land').addEventListener('change', renderMarkers);
+document.getElementById('toggle-active-only').addEventListener('change', renderMarkers);
 document.getElementById('toggle-opportunities').addEventListener('change', renderMarkers);
 document.getElementById('urgency-filter').addEventListener('change', renderMarkers);
 document.getElementById('color-filter').addEventListener('change', renderMarkers);

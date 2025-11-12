@@ -51,14 +51,13 @@ def add_street_color_layer(map_obj: folium.Map) -> None:
 
         # Для каждой улицы получить дома и добавить маркеры
         for street in street_analyses:
-            # Получить дома на этой улице с координатами (только активные листинги)
+            # Получить дома на этой улице с координатами
             properties = session.query(Property).filter(
                 Property.street_name == street.street_name,
                 Property.city == street.city,
                 Property.latitude != None,
                 Property.longitude != None,
-                Property.archived == False,
-                Property.status.in_(['active', 'Active', 'ACTIVE'])  # Only active listings
+                Property.archived == False
             ).limit(10).all()  # Ограничить до 10 домов на улицу для производительности
 
             # Добавить маркер для каждого дома
@@ -122,11 +121,8 @@ def add_land_opportunities_layer(map_obj: folium.Map) -> None:
 
         # Для каждой возможности добавить маркер
         for opp in opportunities:
-            # Получить связанный Property объект (только активные листинги)
-            prop = session.query(Property).filter(
-                Property.id == opp.property_id,
-                Property.status.in_(['active', 'Active', 'ACTIVE'])  # Only active listings
-            ).first()
+            # Получить связанный Property объект
+            prop = session.query(Property).filter_by(id=opp.property_id).first()
 
             if not prop or not prop.latitude or not prop.longitude:
                 continue
