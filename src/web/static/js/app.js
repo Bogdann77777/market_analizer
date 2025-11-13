@@ -101,7 +101,8 @@ function renderMarkers() {
 
     if (activeOnly) {
         vacantLand = vacantLand.filter(p => {
-            const status = (p.status || '').toLowerCase();
+            const status = (p.status || '').toLowerCase().trim().replace(/\s+/g, '-');
+            // Show ONLY active listings, hide: sold, under-contract, off-market, pending, expired, withdrawn
             return status === 'active';
         });
     }
