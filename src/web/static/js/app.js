@@ -7,9 +7,61 @@ let allProperties = [];
 let allOpportunities = [];
 let landPriceFilter = 'all';
 let landSizeFilter = 'all';
+let likedProperties = new Set(); // Store liked property IDs
+let propertyMarkers = {}; // Map property ID to marker for icon updates
+
+// Like/Unlike functions
+function loadLikedProperties() {
+    const saved = localStorage.getItem('likedProperties');
+    if (saved) {
+        likedProperties = new Set(JSON.parse(saved));
+    }
+}
+
+function saveLikedProperties() {
+    localStorage.setItem('likedProperties', JSON.stringify([...likedProperties]));
+}
+
+function isLiked(propertyId) {
+    return likedProperties.has(propertyId);
+}
+
+function toggleLike(propertyId) {
+    if (likedProperties.has(propertyId)) {
+        likedProperties.delete(propertyId);
+    } else {
+        likedProperties.add(propertyId);
+    }
+    saveLikedProperties();
+
+    // Update marker icon if it exists
+    if (propertyMarkers[propertyId]) {
+        const marker = propertyMarkers[propertyId];
+        const liked = isLiked(propertyId);
+
+        // Update icon
+        marker.setIcon(L.divIcon({
+            html: liked ?
+                '<div style="color: #dc2626; font-size: 24px; text-align: center;">❤️</div>' :
+                '<div style="color: #8b4513; font-size: 20px; text-align: center;">▲</div>',
+            className: liked ? 'liked-land-marker' : 'vacant-land-marker',
+            iconSize: [20, 20],
+            iconAnchor: [10, 20]
+        }));
+
+        // Update popup content
+        const prop = allProperties.find(p => p.id === propertyId);
+        if (prop) {
+            marker.setPopupContent(createVacantLandPopup(prop));
+        }
+    }
+}
 
 // Initialize map
 async function initMap() {
+    // Load liked properties from localStorage
+    loadLikedProperties();
+
     // Get config from API
     const config = await fetch('/api/config').then(r => r.json());
 
@@ -84,6 +136,9 @@ function renderMarkers() {
     vacantLandLayer.clearLayers();
     opportunitiesLayer.clearLayers();
 
+    // Clear marker references
+    propertyMarkers = {};
+
     // Get filters
     const showHouses = document.getElementById('toggle-houses').checked;
     const showVacantLand = document.getElementById('toggle-vacant-land').checked;
@@ -151,11 +206,16 @@ function renderMarkers() {
     // Add vacant land markers with different style
     if (showVacantLand) {
         vacantLand.forEach(prop => {
-            // Create triangle marker for vacant land
+            // Check if property is liked
+            const liked = isLiked(prop.id);
+
+            // Create marker for vacant land (triangle or heart)
             const marker = L.marker([prop.lat, prop.lng], {
                 icon: L.divIcon({
-                    html: '<div style="color: #8b4513; font-size: 20px; text-align: center;">▲</div>',
-                    className: 'vacant-land-marker',
+                    html: liked ?
+                        '<div style="color: #dc2626; font-size: 24px; text-align: center;">❤️</div>' :
+                        '<div style="color: #8b4513; font-size: 20px; text-align: center;">▲</div>',
+                    className: liked ? 'liked-land-marker' : 'vacant-land-marker',
                     iconSize: [20, 20],
                     iconAnchor: [10, 20]
                 })
@@ -163,6 +223,9 @@ function renderMarkers() {
 
             marker.bindPopup(createVacantLandPopup(prop));
             marker.addTo(vacantLandLayer);
+
+            // Save marker reference for icon updates
+            propertyMarkers[prop.id] = marker;
         });
 
         // Update filtered count display
@@ -223,6 +286,12 @@ function createVacantLandPopup(prop) {
         `<br><strong>Listing:</strong> <a href="${prop.url}" target="_blank" style="color: #0066cc; text-decoration: underline;">View on Redfin →</a>` :
         `<br><strong>Listing:</strong> <span style="color: #999;">Not available</span>`;
 
+    const liked = isLiked(prop.id);
+    const likeButtonText = liked ? '❤️ Unlike' : '🤍 Like';
+    const likeButtonStyle = liked ?
+        'background: #dc2626; color: white;' :
+        'background: white; color: #666; border: 1px solid #ddd;';
+
     return `
         <div class="popup-content">
             <div class="popup-title">🌳 Vacant Land</div>
@@ -233,6 +302,12 @@ function createVacantLandPopup(prop) {
                 <strong>Lot Size:</strong> ${lotSize}<br>
                 <strong>Price Zone:</strong> ${getZoneColor(prop.price_sqft)}<br>
                 <strong>Status:</strong> ${prop.status}${urlLink}
+            </div>
+            <div style="margin-top: 10px; text-align: center;">
+                <button onclick="toggleLike(${prop.id}); event.stopPropagation();"
+                        style="padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; ${likeButtonStyle}">
+                    ${likeButtonText}
+                </button>
             </div>
         </div>
     `;
